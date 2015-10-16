@@ -30,7 +30,7 @@ makeCacheMatrix <- function(x = matrix()) {
 	}
 
 	if(is.null(listFunc)) {
-		listFunc <<- list(set=set, get=get, setInverse=setInverse, getInverse=getInverse)
+		listFunc <- list(set=set, get=get, setInverse=setInverse, getInverse=getInverse)
 	}
 
 	attr(makeCacheMatrix, "staticObjFuncs") <<- listFunc
@@ -50,6 +50,8 @@ cacheSolve <- function(x, ...) {
 
 	    listFunc <- makeCacheMatrix(x)
 
+	    #check if the existing matrix in cache is equivalent to the matrix passed here or not
+	    #if they are not equal clear the cache and set new matrix value in the cache
     	oldMatrix = listFunc$get()
     	if(dim(x)!=dim(oldMatrix) || !all(x==oldMatrix)) {
         	listFunc$setInverse(NULL)
