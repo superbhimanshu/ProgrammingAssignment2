@@ -11,6 +11,8 @@
 
 makeCacheMatrix <- function(x = matrix()) {
 
+	#we need to set a variable (similar to static which remains in environment, once initialized)
+	listFunc <<- attr(makeCacheMatrix, "staticObjFuncs")
 	inverseMatrix <- NULL
 	set <- function(y) {
 		x <<- y
@@ -27,7 +29,15 @@ makeCacheMatrix <- function(x = matrix()) {
 		inverseMatrix
 	}
 
-	list(set=set, get=get, setInverse=setInverse, getInverse=getInverse)
+	if(is.null(listFunc)) {
+		listFunc <<- list(set=set, get=get, setInverse=setInverse, getInverse=getInverse)
+	}
+
+	attr(makeCacheMatrix, "staticObjFuncs") <<- listFunc
+
+	listFunc
+
+	
 }
 
 
@@ -37,11 +47,16 @@ makeCacheMatrix <- function(x = matrix()) {
 
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
-        #create list of functions using makeCacheMatrix
-        listFuncs <- makeCacheMatrix(x)
-        listFuncs$set(x)
+
+	    listFunc <- makeCacheMatrix(x)
+
+    	oldMatrix = listFunc$get()
+    	if(dim(x)!=dim(oldMatrix) || !all(x==oldMatrix)) {
+        	listFunc$setInverse(NULL)
+        	listFunc$set(x)
+    	} 
         # check if inverse already exists in cache, if it does(not null) return it 
-        inverseMatrix <- listFuncs$getInverse()
+        inverseMatrix <- listFunc$getInverse()
         if(!is.null(inverseMatrix)) {
         	message("Inverse exists in cache")
         	return(inverseMatrix)
@@ -49,6 +64,6 @@ cacheSolve <- function(x, ...) {
         #if it doesn't exist find inverse matrix and set the result to cache 
         message("Inverse doesn't exist in cache. Estimating inverse and storing it in cache.")
         inverseMatrix <- solve(x)
-        listFuncs$setInverse(inverseMatrix)
+        listFunc$setInverse(inverseMatrix)
         inverseMatrix
 }
