@@ -1,3 +1,5 @@
+##Author: Himanshu Verma
+## October, 15 2015
 ##### makeCacheMatrix function returns a list of functions for:
 # 1. setting the matrix
 # 2. getting the matrix
